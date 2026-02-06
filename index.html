@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ты котакбас?</title>
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    text-align: center;
+    overflow: hidden;
+    transition: background 0.1s, color 0.1s;
+}
+h1 { font-size: 3rem; margin-bottom: 30px; }
+.buttons { display: flex; gap: 20px; }
+button {
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    border: none;
+    border-radius: 10px;
+    transition: transform 0.2s;
+    position: relative;
+}
+button:hover { transform: translateY(-5px); }
+.yes { background: #28a745; color: white; }
+.no { background: #dc3545; color: white; }
+#screamerBox {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.1s;
+    z-index: 1000;
+    flex-direction: column;
+}
+#screamerBox img {
+    max-width: 90%;
+    max-height: 90%;
+}
+</style>
+</head>
+<body>
+
+<h1>Ты котакбас?</h1>
+<div class="buttons">
+    <button class="yes" id="yesBtn">Yes</button>
+    <button class="no" id="noBtn">No</button>
+</div>
+
+<div id="screamerBox">
+    <img id="screamImg" src="">
+    <audio id="screamSound" preload="auto"></audio>
+</div>
+
+<script>
+// Скримеры с прямыми ссылками на MP3 (Pixabay) – гарантированно работают
+const noScares = [
+    { img: "https://i.imgur.com/3tZ7qL5.png", audio: "https://cdn.pixabay.com/download/audio/2022/03/15/audio_9d0ff7baf7.mp3?filename=jump-scare-scream-82738.mp3" },
+    { img: "https://i.imgur.com/4R5TJ5G.png", audio: "https://cdn.pixabay.com/download/audio/2022/03/15/audio_f6f63b3b60.mp3?filename=screamer-jumpscare-66896.mp3" }
+];
+const yesScares = [
+    { img: "https://i.imgur.com/2YgN1IY.png", audio: "https://cdn.pixabay.com/download/audio/2022/03/15/audio_9d0ff7baf7.mp3?filename=jump-scare-scream-82738.mp3" },
+    { img: "https://i.imgur.com/eKqaK8X.png", audio: "https://cdn.pixabay.com/download/audio/2022/03/15/audio_f6f63b3b60.mp3?filename=screamer-jumpscare-66896.mp3" }
+];
+const glitchScares = [
+    { img: "https://i.imgur.com/M2Nu6NA.png", audio: "https://cdn.pixabay.com/download/audio/2022/03/15/audio_9d0ff7baf7.mp3?filename=jump-scare-scream-82738.mp3" },
+    { img: "https://i.imgur.com/6Y7qDkW.png", audio: "https://cdn.pixabay.com/download/audio/2022/03/15/audio_f6f63b3b60.mp3?filename=screamer-jumpscare-66896.mp3" }
+];
+
+let yesBtn = document.getElementById("yesBtn");
+let noBtn = document.getElementById("noBtn");
+let screamerBox = document.getElementById("screamerBox");
+let screamImg = document.getElementById("screamImg");
+let screamSound = document.getElementById("screamSound");
+
+let yesScale = 1;
+let noClickCount = 0;
+let glitching = false;
+
+// Случайный элемент
+function randomItem(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+// Показать скример с громким звуком
+function showScreamer(scare){
+    screamImg.src = scare.img;
+    screamSound.src = scare.audio;
+    screamSound.volume = 1.0;   // Максимальный звук
+    screamSound.play().catch(e=>console.log(e));
+    screamerBox.style.opacity = 1;
+    setTimeout(()=>screamerBox.style.opacity=0,1500);
+}
+
+// Глюк-эффект
+function glitchEffect(duration=3000){
+    glitching = true;
+    let interval = setInterval(()=>{
+        let colors = ['#fff','#000','#f00','#0f0','#00f','#ff0','#0ff'];
+        document.body.style.background = colors[Math.floor(Math.random()*colors.length)];
+        document.body.style.color = colors[Math.floor(Math.random()*colors.length)];
+        yesBtn.style.top = Math.random()*120 - 60 + 'px';
+        yesBtn.style.left = Math.random()*120 - 60 + 'px';
+        noBtn.style.top = Math.random()*120 - 60 + 'px';
+        noBtn.style.left = Math.random()*120 - 60 + 'px';
+    },100);
+    setTimeout(()=>{
+        clearInterval(interval);
+        document.body.style.background = "#111";
+        document.body.style.color = "#fff";
+        yesBtn.style.top = noBtn.style.top = yesBtn.style.left = noBtn.style.left = '0px';
+        showScreamer(randomItem(glitchScares));
+        glitching = false;
+    }, duration);
+}
+
+// Кнопка No
+noBtn.onclick = ()=>{
+    if(glitching) return;
+    noClickCount++;
+    showScreamer(randomItem(noScares));
+    yesScale += 0.15;
+    yesBtn.style.transform = "scale("+yesScale+")";
+    if(noClickCount>=2){
+        glitchEffect();
+        noClickCount=0;
+    }
+};
+
+// Кнопка Yes
+yesBtn.onclick = ()=>{
+    showScreamer(randomItem(yesScares));
+};
+
+</script>
+</body>
+</html>
